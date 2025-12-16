@@ -1,4 +1,31 @@
-import pandas as pd, numpy as np, joblib, shap
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import pandas as pd
+import numpy as np
+import joblib
+import shap
+import os
+
+app = Flask(__name__)
+CORS(app)
+
+# Load Models
+try:
+    model = joblib.load('heart_disease_model.pkl')
+    scaler = joblib.load('scaler.pkl')
+    # Try to load explainer, but handle failure gracefully as SHAP can be version-sensitive
+    try:
+        explainer = shap.TreeExplainer(model)
+    except:
+        explainer = None
+    model_error = None
+except Exception as e:
+    model = None
+    scaler = None
+    explainer = None
+    model_error = str(e)
+
+cols = ['age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 'restecg', 'thalach', 'exang', 'oldpeak', 'slope', 'ca', 'thal']
 
 def get_report(i):
     checks = [
