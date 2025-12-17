@@ -34,7 +34,10 @@ def get_report(i):
         (i[5]==1, "High FBS (>120)", "Normal FBS"),
         (i[8]==1, "Exercise Angina Detected", "No Exercise Angina"),
         (i[9]>1.0, f"ST Depression ({i[9]})", "Normal ST"),
-        (i[11]>0, f"{int(i[11])} Colored Vessels", "No Colored Vessels")
+        (i[11]>0, f"{int(i[11])} Colored Vessels", "No Colored Vessels"),
+        (i[2]==0, "Typical Angina (Warning)", ""),
+        (i[2]!=0 and i[2]!=3, "Chest Pain Detected", "No Chest Pain"),
+        (i[12]==2 or i[12]==3, "Thalassemia Defect", "Normal Thalassemia")
     ]
     return [m for c,m,_ in checks if c], [m for c,_,m in checks if not c and m]
 
@@ -60,7 +63,8 @@ def predict():
         
         # Calculate Risk Score (Red Flags)
         risk_score = 0
-        if f[2] > 0 and f[2] != 3: risk_score += 1 # Chest Pain (Typical/Atypical) - dataset dependent, assuming non-asymptomatic is risk
+        if f[2] == 0: risk_score += 2   # Typical Angina (High Risk)
+        elif f[2] != 3: risk_score += 1 # Other pains (Mild Risk)
         if f[3] > 140: risk_score += 1 # High BP
         if f[4] > 240: risk_score += 1 # High Chol
         if f[8] == 1: risk_score += 2  # Exercise Angina (Strong Indicator)
